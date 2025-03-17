@@ -7,7 +7,6 @@ import {Hooks} from "v4-core/libraries/Hooks.sol";
 import {PoolKey} from "v4-core/types/PoolKey.sol";
 import {PoolId, PoolIdLibrary} from "v4-core/types/PoolId.sol";
 import {BalanceDelta} from "v4-core/types/BalanceDelta.sol";
-import {Currency} from "v4-core/types/Currency.sol";
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import "./interfaces/IPerpetualHook.sol";
 
@@ -119,15 +118,7 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
     }
 
     function updateOpenInterest(uint256 amount, bool increase) external {
-        // single pool
-        PoolKey memory key = PoolKey({
-            currency0: Currency.wrap(address(0)),
-            currency1: Currency.wrap(address(0)),
-            fee: 0,
-            tickSpacing: 0,
-            hooks: IHooks(address(0))
-        });
-        PoolState storage state = poolStates[key.toId()];
+        PoolState storage state = poolStates[poolKey.toId()];
 
         if (increase) {
             state.totalOpenInterest += amount;
