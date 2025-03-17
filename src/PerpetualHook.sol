@@ -48,16 +48,11 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
         });
     }
 
-    function _beforeInitialize(address, PoolKey calldata, uint160) internal virtual override returns (bytes4) {
+    function _beforeInitialize(address, PoolKey calldata, uint160) internal pure override returns (bytes4) {
         return IHooks.beforeInitialize.selector;
     }
 
-    function _afterInitialize(address, PoolKey calldata key, uint160, int24)
-        internal
-        virtual
-        override
-        returns (bytes4)
-    {
+    function _afterInitialize(address, PoolKey calldata key, uint160, int24) internal override returns (bytes4) {
         poolKey = key;
         poolStates[key.toId()] = PoolState({totalLiquidity: 0, totalOpenInterest: 0, maxLeverage: MAX_LEVERAGE});
         return IHooks.afterInitialize.selector;
@@ -68,7 +63,7 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
         PoolKey calldata key,
         IPoolManager.ModifyLiquidityParams calldata params,
         bytes calldata
-    ) internal virtual override returns (bytes4) {
+    ) internal override returns (bytes4) {
         PoolState storage state = poolStates[key.toId()];
 
         // Update liquidity tracking for adding liquidity
@@ -86,7 +81,7 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
         BalanceDelta,
         BalanceDelta,
         bytes calldata
-    ) internal virtual override returns (bytes4, BalanceDelta) {
+    ) internal pure override returns (bytes4, BalanceDelta) {
         return (IHooks.afterAddLiquidity.selector, BalanceDelta.wrap(0));
     }
 
@@ -95,7 +90,7 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
         PoolKey calldata key,
         IPoolManager.ModifyLiquidityParams calldata params,
         bytes calldata
-    ) internal virtual override returns (bytes4) {
+    ) internal override returns (bytes4) {
         PoolState storage state = poolStates[key.toId()];
 
         // Update liquidity tracking for removing liquidity
@@ -113,7 +108,7 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
         BalanceDelta,
         BalanceDelta,
         bytes calldata
-    ) internal pure virtual override returns (bytes4, BalanceDelta) {
+    ) internal pure override returns (bytes4, BalanceDelta) {
         return (IHooks.afterRemoveLiquidity.selector, BalanceDelta.wrap(0));
     }
 
