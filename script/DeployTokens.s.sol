@@ -26,4 +26,4 @@ contract DeployTokens is Script {
         console.log("Token1:", address(token1));
         console.log("Minted tokens to:", deployer);
     }
-} 
+}

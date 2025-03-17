@@ -15,29 +15,25 @@ import {HookMiner} from "v4-periphery/src/utils/HookMiner.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Deploy is Script {
-
     address constant CREATE2_DEPLOYER = address(0x4e59b44847b379578588920cA78FbF26c0B4956C);
 
     // Hook flags for our hook implementation
-    uint160 constant HOOKS_FLAGS = Hooks.BEFORE_INITIALIZE_FLAG | 
-                                 Hooks.AFTER_INITIALIZE_FLAG | 
-                                 Hooks.BEFORE_ADD_LIQUIDITY_FLAG |
-                                 Hooks.AFTER_ADD_LIQUIDITY_FLAG | 
-                                 Hooks.BEFORE_REMOVE_LIQUIDITY_FLAG |
-                                 Hooks.AFTER_REMOVE_LIQUIDITY_FLAG;
+    uint160 constant HOOKS_FLAGS = Hooks.BEFORE_INITIALIZE_FLAG | Hooks.AFTER_INITIALIZE_FLAG
+        | Hooks.BEFORE_ADD_LIQUIDITY_FLAG | Hooks.AFTER_ADD_LIQUIDITY_FLAG | Hooks.BEFORE_REMOVE_LIQUIDITY_FLAG
+        | Hooks.AFTER_REMOVE_LIQUIDITY_FLAG;
 
     function run() public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address poolManagerAddress = vm.envAddress("POOL_MANAGER_ADDRESS");
         address token0Address = vm.envAddress("TOKEN0_ADDRESS");
         address token1Address = vm.envAddress("TOKEN1_ADDRESS");
-        
+
         // Validate addresses
         require(token0Address != address(0), "TOKEN0_ADDRESS cannot be zero address");
         require(token1Address != address(0), "TOKEN1_ADDRESS cannot be zero address");
         require(token0Address < token1Address, "TOKEN0_ADDRESS must be less than TOKEN1_ADDRESS");
         require(poolManagerAddress != address(0), "POOL_MANAGER_ADDRESS cannot be zero address");
-        
+
         vm.startBroadcast(deployerPrivateKey);
 
         // Approve tokens for pool manager
@@ -46,12 +42,8 @@ contract Deploy is Script {
 
         // Mine a salt that will produce a hook address with the correct flags
         bytes memory constructorArgs = abi.encode(IPoolManager(poolManagerAddress));
-        (address hookAddress, bytes32 salt) = HookMiner.find(
-            CREATE2_DEPLOYER,
-            HOOKS_FLAGS,
-            type(PerpetualHook).creationCode,
-            constructorArgs
-        );
+        (address hookAddress, bytes32 salt) =
+            HookMiner.find(CREATE2_DEPLOYER, HOOKS_FLAGS, type(PerpetualHook).creationCode, constructorArgs);
 
         // Deploy the hook using CREATE2
         PerpetualHook hook = new PerpetualHook{salt: salt}(IPoolManager(poolManagerAddress));
@@ -61,10 +53,7 @@ contract Deploy is Script {
         SimplePriceOracle oracle = new SimplePriceOracle();
 
         // Deploy position manager
-        PerpPositionManager positionManager = new PerpPositionManager(
-            address(hook),
-            address(oracle)
-        );
+        PerpPositionManager positionManager = new PerpPositionManager(address(hook), address(oracle));
 
         // Create and initialize pool
         PoolKey memory poolKey = PoolKey({
@@ -82,7 +71,7 @@ contract Deploy is Script {
         } catch Error(string memory reason) {
             console.log("Pool initialization failed:", reason);
             revert(reason);
-        } catch (bytes memory /*lowLevelData*/) {
+        } catch (bytes memory) /*lowLevelData*/ {
             console.log("Pool initialization failed with low-level error");
             revert("Pool initialization failed with low-level error");
         }
@@ -94,4 +83,4 @@ contract Deploy is Script {
         console.log("SimplePriceOracle:", address(oracle));
         console.log("PerpPositionManager:", address(positionManager));
     }
-} 
+}
