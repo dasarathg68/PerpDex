@@ -117,3 +117,59 @@ The protocol implements several security measures:
 3. Dynamic leverage limits based on pool utilization
 4. Maintenance margin requirements
 5. MEV protection through EigenLayer AVS
+
+## Contracts
+
+- `PerpetualHook`: The main hook contract that manages liquidity and open interest for perpetual trading
+- `PerpPositionManager`: Manages user positions and handles position opening/closing
+- `SimplePriceOracle`: A basic price oracle implementation
+
+## Deployment
+
+1. Install dependencies:
+
+```bash
+forge install
+```
+
+2. Set up environment variables:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and fill in:
+
+- `PRIVATE_KEY`: Your deployer wallet's private key
+- `POOL_MANAGER_ADDRESS`: Address of the Uniswap V4 Pool Manager contract
+- `TOKEN0_ADDRESS`: Address of the first token in the pool
+- `TOKEN1_ADDRESS`: Address of the second token in the pool
+
+Note: `TOKEN0_ADDRESS` must be less than `TOKEN1_ADDRESS` when compared as integers.
+
+3. Deploy the contracts:
+
+```bash
+forge script script/Deploy.s.sol:Deploy --rpc-url <your_rpc_url> --broadcast
+```
+
+This will:
+
+1. Deploy the PerpetualHook to a deterministic address based on its hook permissions
+2. Deploy the SimplePriceOracle
+3. Deploy the PerpPositionManager
+4. Initialize a Uniswap V4 pool with the specified tokens
+
+## Development
+
+To run tests:
+
+```bash
+forge test
+```
+
+To run a specific test:
+
+```bash
+forge test --match-test testFunctionName
+```
