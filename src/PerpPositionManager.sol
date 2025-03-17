@@ -20,28 +20,22 @@ contract PerpPositionManager is IPerpPositionManager, ReentrancyGuard, Ownable {
     uint256 public nextPositionId;
     mapping(uint256 => Position) public positions;
 
-    constructor(
-        address _perpetualHook,
-        address _priceOracle
-    ) Ownable(msg.sender) {
+    constructor(address _perpetualHook, address _priceOracle) Ownable(msg.sender) {
         perpetualHook = IPerpetualHook(_perpetualHook);
         priceOracle = ISimplePriceOracle(_priceOracle);
         nextPositionId = 1;
     }
 
-    function openPosition(
-        bool isLong,
-        uint256 margin,
-        uint256 leverage
-    ) external nonReentrant returns (uint256 positionId) {
+    function openPosition(bool isLong, uint256 margin, uint256 leverage)
+        external
+        nonReentrant
+        returns (uint256 positionId)
+    {
         require(margin > 0, "Invalid margin");
         require(leverage >= 2 && leverage <= 10, "Invalid leverage");
 
         // Validate trade with hook
-        require(
-            perpetualHook.validateTrade(margin, leverage),
-            "Trade validation failed"
-        );
+        require(perpetualHook.validateTrade(margin, leverage), "Trade validation failed");
 
         // Calculate position size
         uint256 size = margin * leverage;
@@ -62,15 +56,7 @@ contract PerpPositionManager is IPerpPositionManager, ReentrancyGuard, Ownable {
         // Update open interest
         perpetualHook.updateOpenInterest(size, true);
 
-        emit PositionOpened(
-            positionId,
-            msg.sender,
-            isLong,
-            size,
-            margin,
-            leverage,
-            entryPrice
-        );
+        emit PositionOpened(positionId, msg.sender, isLong, size, margin, leverage, entryPrice);
     }
 
     function closePosition(uint256 positionId) external nonReentrant {
@@ -150,4 +136,4 @@ contract PerpPositionManager is IPerpPositionManager, ReentrancyGuard, Ownable {
             }
         }
     }
-} 
+}

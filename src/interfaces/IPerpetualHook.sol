@@ -15,4 +15,4 @@ interface IPerpetualHook {
     function updateOpenInterest(uint256 amount, bool increase) external;
     function calculateMaxLeverage() external view returns (uint256);
     function validateTrade(uint256 amount, uint256 leverage) external view returns (bool);
-} 
+}

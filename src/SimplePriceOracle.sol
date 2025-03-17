@@ -20,4 +20,4 @@ contract SimplePriceOracle is ISimplePriceOracle, Ownable {
         price = _price;
         emit PriceUpdated(_price);
     }
-} 
+}

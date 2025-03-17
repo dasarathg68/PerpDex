@@ -22,29 +22,17 @@ interface IPerpPositionManager {
         uint256 entryPrice
     );
 
-    event PositionClosed(
-        uint256 indexed positionId,
-        address indexed trader,
-        uint256 pnl
-    );
+    event PositionClosed(uint256 indexed positionId, address indexed trader, uint256 pnl);
 
-    event PositionLiquidated(
-        uint256 indexed positionId,
-        address indexed trader,
-        uint256 pnl
-    );
+    event PositionLiquidated(uint256 indexed positionId, address indexed trader, uint256 pnl);
 
-    function openPosition(
-        bool isLong,
-        uint256 margin,
-        uint256 leverage
-    ) external returns (uint256 positionId);
+    function openPosition(bool isLong, uint256 margin, uint256 leverage) external returns (uint256 positionId);
 
     function closePosition(uint256 positionId) external;
-    
+
     function liquidatePosition(uint256 positionId) external;
-    
+
     function getPosition(uint256 positionId) external view returns (Position memory);
-    
+
     function isLiquidatable(uint256 positionId) external view returns (bool);
-} 
+}

@@ -18,7 +18,7 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
     uint256 private constant MAX_BPS = 10000;
     uint256 private constant MIN_LEVERAGE = 2;
     uint256 private constant MAX_LEVERAGE = 10;
-    
+
     // State variables
     mapping(PoolId => PoolState) public poolStates;
     PoolKey public poolKey;
@@ -49,12 +49,7 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
         });
     }
 
-    function _beforeInitialize(address , PoolKey calldata , uint160 )
-        internal
-        virtual
-        override
-        returns (bytes4)
-    {
+    function _beforeInitialize(address, PoolKey calldata, uint160) internal virtual override returns (bytes4) {
         return IHooks.beforeInitialize.selector;
     }
 
@@ -65,11 +60,7 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
         returns (bytes4)
     {
         poolKey = key;
-        poolStates[key.toId()] = PoolState({
-            totalLiquidity: 0,
-            totalOpenInterest: 0,
-            maxLeverage: MAX_LEVERAGE
-        });
+        poolStates[key.toId()] = PoolState({totalLiquidity: 0, totalOpenInterest: 0, maxLeverage: MAX_LEVERAGE});
         return IHooks.afterInitialize.selector;
     }
 
@@ -78,14 +69,14 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
         PoolKey calldata key,
         IPoolManager.ModifyLiquidityParams calldata params,
         bytes calldata
-    ) internal override virtual returns (bytes4) {
+    ) internal virtual override returns (bytes4) {
         PoolState storage state = poolStates[key.toId()];
-        
+
         // Update liquidity tracking for adding liquidity
         if (params.liquidityDelta > 0) {
             state.totalLiquidity += uint256(params.liquidityDelta);
         }
-        
+
         return IHooks.beforeAddLiquidity.selector;
     }
 
@@ -96,7 +87,7 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
         BalanceDelta,
         BalanceDelta,
         bytes calldata
-    ) internal override virtual returns (bytes4, BalanceDelta) {
+    ) internal virtual override returns (bytes4, BalanceDelta) {
         return (IHooks.afterAddLiquidity.selector, BalanceDelta.wrap(0));
     }
 
@@ -105,14 +96,14 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
         PoolKey calldata key,
         IPoolManager.ModifyLiquidityParams calldata params,
         bytes calldata
-    ) internal override virtual returns (bytes4) {
+    ) internal virtual override returns (bytes4) {
         PoolState storage state = poolStates[key.toId()];
-        
+
         // Update liquidity tracking for removing liquidity
         if (params.liquidityDelta < 0) {
             state.totalLiquidity -= uint256(-params.liquidityDelta);
         }
-        
+
         return IHooks.beforeRemoveLiquidity.selector;
     }
 
@@ -123,7 +114,7 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
         BalanceDelta,
         BalanceDelta,
         bytes calldata
-    ) internal override pure virtual returns (bytes4, BalanceDelta) {
+    ) internal pure virtual override returns (bytes4, BalanceDelta) {
         return (IHooks.afterRemoveLiquidity.selector, BalanceDelta.wrap(0));
     }
 
@@ -141,46 +132,45 @@ contract PerpetualHook is BaseHook, IPerpetualHook {
         if (increase) {
             state.totalOpenInterest += amount;
         } else {
-            state.totalOpenInterest = state.totalOpenInterest > amount ? 
-                state.totalOpenInterest - amount : 0;
+            state.totalOpenInterest = state.totalOpenInterest > amount ? state.totalOpenInterest - amount : 0;
         }
 
         state.maxLeverage = calculateMaxLeverage();
-        
+
         emit OpenInterestChanged(state.totalOpenInterest);
         emit LeverageLimitUpdated(state.maxLeverage);
     }
 
     function calculateMaxLeverage() public view returns (uint256) {
         PoolState memory state = getPoolState();
-        
+
         if (state.totalLiquidity == 0) return MIN_LEVERAGE;
-        
+
         uint256 utilization = (state.totalOpenInterest * MAX_BPS) / state.totalLiquidity;
-        
+
         if (utilization >= MAX_BPS) return MIN_LEVERAGE;
-        
+
         // Linear interpolation between max and min leverage based on utilization
         uint256 leverageRange = MAX_LEVERAGE - MIN_LEVERAGE;
         uint256 adjustedLeverage = MAX_LEVERAGE - (leverageRange * utilization) / MAX_BPS;
-        
+
         return adjustedLeverage;
     }
 
     function validateTrade(uint256 amount, uint256 leverage) external view returns (bool) {
         PoolState memory state = getPoolState();
-        
+
         // Check if leverage is within limits
         if (leverage < MIN_LEVERAGE || leverage > state.maxLeverage) {
             return false;
         }
-        
+
         // Check if there's enough liquidity
         uint256 totalRequired = amount * leverage;
         if (totalRequired > state.totalLiquidity) {
             return false;
         }
-        
+
         return true;
     }
-} 
+}

@@ -86,14 +86,13 @@ contract PerpDexTest is Test, Deployers {
         token1.approve(address(modifyLiquidityRouter), type(uint256).max);
 
         // Deploy our hook with the proper flags
-        address hookAddress = address(uint160(
-            Hooks.BEFORE_INITIALIZE_FLAG |
-            Hooks.AFTER_INITIALIZE_FLAG |
-            Hooks.BEFORE_ADD_LIQUIDITY_FLAG |
-            Hooks.AFTER_ADD_LIQUIDITY_FLAG |
-            Hooks.BEFORE_REMOVE_LIQUIDITY_FLAG |
-            Hooks.AFTER_REMOVE_LIQUIDITY_FLAG
-        ));
+        address hookAddress = address(
+            uint160(
+                Hooks.BEFORE_INITIALIZE_FLAG | Hooks.AFTER_INITIALIZE_FLAG | Hooks.BEFORE_ADD_LIQUIDITY_FLAG
+                    | Hooks.AFTER_ADD_LIQUIDITY_FLAG | Hooks.BEFORE_REMOVE_LIQUIDITY_FLAG
+                    | Hooks.AFTER_REMOVE_LIQUIDITY_FLAG
+            )
+        );
 
         // Deploy the hook to the correct address
         deployCodeTo("test/PerpDex.t.sol:TestPerpetualHook", abi.encode(manager), hookAddress);
@@ -137,7 +136,7 @@ contract PerpDexTest is Test, Deployers {
         modifyLiquidityRouter.modifyLiquidity(
             poolKey,
             IPoolManager.ModifyLiquidityParams({
-                tickLower: -120,  // Price range around 1:1
+                tickLower: -120, // Price range around 1:1
                 tickUpper: 120,
                 liquidityDelta: 1000e18,
                 salt: bytes32(0)
@@ -202,8 +201,7 @@ contract PerpDexTest is Test, Deployers {
         vm.expectRevert("Invalid leverage");
 
         positionManager.openPosition(true, 1 ether, 11);
-        
 
         vm.stopPrank();
     }
-} 
+}

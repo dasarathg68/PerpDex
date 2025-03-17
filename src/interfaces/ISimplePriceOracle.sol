@@ -6,4 +6,4 @@ interface ISimplePriceOracle {
 
     function getPrice() external view returns (uint256);
     function updatePrice(uint256 _price) external;
-} 
+}
