@@ -10,6 +10,17 @@ The protocol consists of three main components:
 2. **PerpPositionManager**: Manages leveraged trading positions, including opening, closing, and liquidation.
 3. **PerpOracle**: Provides price feeds for trading pairs, with built-in staleness checks and update frequency limits.
 
+![Architecture Diagram](assets/architecture.png)
+
+The diagram above illustrates the interaction between key components:
+
+- **Trader**: Initiates position requests
+- **PerpPositionManager**: Validates and manages trading positions
+- **PerpetualHook**: Handles pool interactions and liquidity management
+- **UniswapV4**: Core DEX infrastructure
+- **PerpOracle**: Price feed management
+- **EigenLayerAVS**: Provides price updates and MEV protection
+
 ## System Flow
 
 ### Trading Flow
